@@ -154,8 +154,7 @@ public class BeroViewFrame extends UFrame {
 	
 	public void onMouseWheelMoved(MouseWheelEvent e)
 	{
-		if(e.isControlDown())
-		{ // Control + MouseWheel is progressing randomly
+		if(e.isControlDown()) 		{ // Control + MouseWheel is progressing randomly
 			proceedToImage(Progress.Random);
 			return;
 		}

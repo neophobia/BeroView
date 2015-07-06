@@ -19,6 +19,7 @@ public class ImageArea extends JPanel {
 	
 	private Image currentImage;
 	private String currentFilePath;
+	private String currentFilePosition;
 
     public void setImage(Image image) {
     	if(image == null)
@@ -31,8 +32,9 @@ public class ImageArea extends JPanel {
     	this.repaint();
     }
 
-	public void setFilePath(String filePath) {
+	public void setFilePath(String filePath, String filePosition) {
 		currentFilePath = filePath;
+		currentFilePosition = filePosition;
 		this.repaint();
 	}
     
@@ -80,6 +82,7 @@ public class ImageArea extends JPanel {
     	if(currentFilePath != null && !currentFilePath.isEmpty()) {
     		g.setColor(Color.WHITE);
     		g.drawString(currentFilePath, 25, 25);
+    		g.drawString(currentFilePosition, 25, 40);
     	}
     }
 }

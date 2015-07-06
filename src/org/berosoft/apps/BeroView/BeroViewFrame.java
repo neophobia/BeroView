@@ -37,6 +37,7 @@ public class BeroViewFrame extends UFrame {
 	private LinkedList<String> bitmapPathList;
 	private Image currentImage;
 	private int currentIndex;
+	private int numberOfImages;
 	private boolean isFullscreen = false;
 	private Random random = new Random();
 	private boolean showFilePath = false;
@@ -45,6 +46,7 @@ public class BeroViewFrame extends UFrame {
 	public BeroViewFrame(LinkedList<String> filePathList, int index) {
 		currentIndex = index;
 		bitmapPathList = filePathList;
+		numberOfImages = bitmapPathList.size();
 		
 		String currentPath = bitmapPathList.get(currentIndex);
 		currentImage = new ImageIcon(currentPath).getImage();
@@ -122,7 +124,7 @@ public class BeroViewFrame extends UFrame {
 			case KeyEvent.VK_D:
 				{
 					showFilePath = !showFilePath;
-					updateImageArea(bitmapPathList.get(currentIndex));
+					updateImageArea();
 				}
 				break;
 			
@@ -131,7 +133,7 @@ public class BeroViewFrame extends UFrame {
 			case KeyEvent.VK_ENTER:
 				{ // switch between full screen and windowed mode
 					toggleFullscreenDisplay();
-					updateImageArea(bitmapPathList.get(currentIndex));
+					updateImageArea();
 				}
 				break;
 				
@@ -187,7 +189,7 @@ public class BeroViewFrame extends UFrame {
                     @Override
                     public void onImageLoadCompleted(String imagePath, Image loadedImage) {
                     	imageFrame.currentImage = loadedImage;
-                    	updateImageArea(bitmapPath);
+                    	updateImageArea();
                     }
                 });
             }
@@ -195,10 +197,11 @@ public class BeroViewFrame extends UFrame {
         thread.start();
 	}
 	
-	private void updateImageArea(String bitmapPath)
+	private void updateImageArea()
 	{
-		if(!isFullscreen)
-		{
+		String bitmapPath = bitmapPathList.get(currentIndex);
+		
+		if(!isFullscreen) {
 			Dimension imageSize = new Dimension(currentImage.getWidth(this), currentImage.getHeight(this));
 			if(!imageSize.equals(imageArea.getPreferredSize()))
 			{
@@ -208,7 +211,7 @@ public class BeroViewFrame extends UFrame {
 				pack();
 			}
 			
-			imageArea.setFilePath("");
+			imageArea.setFilePath("", "");
 			
 			if(showFilePath) {
 		        setTitle("BeroView - " + bitmapPath);
@@ -219,10 +222,11 @@ public class BeroViewFrame extends UFrame {
 		}
 		else {
 			if(showFilePath) {
-				imageArea.setFilePath(bitmapPath);			
+				String filePosition = Integer.toString(currentIndex + 1) + " / " + Integer.toString(numberOfImages);
+				imageArea.setFilePath(bitmapPath, filePosition);			
 			}
 			else {
-				imageArea.setFilePath("");
+				imageArea.setFilePath("", "");
 			}
 		}
 		imageArea.setImage(currentImage);

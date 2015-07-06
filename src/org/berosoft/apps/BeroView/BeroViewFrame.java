@@ -143,6 +143,44 @@ public class BeroViewFrame extends UFrame {
 					this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
 				}
 				break;
+				
+		    case KeyEvent.VK_ADD:
+			case KeyEvent.VK_PLUS:
+				{ // Zoom into the image
+					imageArea.zoomIn();
+				}
+				break;
+
+			case KeyEvent.VK_SUBTRACT:
+			case KeyEvent.VK_MINUS:
+				{ // Zoom out of the image
+					imageArea.zoomOut();
+				}
+				break;
+
+			case KeyEvent.VK_NUMPAD8:
+			{ // Pan in direction top
+				imageArea.panUp();
+			}
+			break;
+
+			case KeyEvent.VK_NUMPAD2:
+			{ // Pan in direction bottom
+				imageArea.panDown();
+			}
+			break;
+
+			case KeyEvent.VK_NUMPAD4:
+			{ // Pan in direction left
+				imageArea.panLeft();
+			}
+			break;
+
+			case KeyEvent.VK_NUMPAD6:
+			{ // Pan in direction right
+				imageArea.panRight();
+			}
+			break;
 
 			default:
 				break;
@@ -156,13 +194,13 @@ public class BeroViewFrame extends UFrame {
 	
 	public void onMouseWheelMoved(MouseWheelEvent e)
 	{
-		if(e.isControlDown()) 		{ // Control + MouseWheel is progressing randomly
+		if(e.isAltDown()) 		{ // [ALT] + MouseWheel is progressing randomly
 			proceedToImage(Progress.Random);
 			return;
 		}
 		
         int notches = e.getWheelRotation();
-        boolean proceedByBatch = e.isShiftDown();
+        boolean proceedByBatch = e.isShiftDown(); // [SHIFT] + MouseWheel big steps progression, single step otherwise
         if (notches < 0) {
         	if(proceedByBatch) {
     			proceedToImage(Progress.PreviousByBatch);
@@ -200,6 +238,7 @@ public class BeroViewFrame extends UFrame {
 	private void updateImageArea()
 	{
 		String bitmapPath = bitmapPathList.get(currentIndex);
+		String filePosition = Integer.toString(currentIndex + 1) + " / " + Integer.toString(numberOfImages);
 		
 		if(!isFullscreen) {
 			Dimension imageSize = new Dimension(currentImage.getWidth(this), currentImage.getHeight(this));
@@ -214,7 +253,7 @@ public class BeroViewFrame extends UFrame {
 			imageArea.setFilePath("", "");
 			
 			if(showFilePath) {
-		        setTitle("BeroView - " + bitmapPath);
+		        setTitle("BeroView - " + filePosition + " - " + bitmapPath);
 			}
 			else {
 				setTitle("BeroView");
@@ -222,7 +261,6 @@ public class BeroViewFrame extends UFrame {
 		}
 		else {
 			if(showFilePath) {
-				String filePosition = Integer.toString(currentIndex + 1) + " / " + Integer.toString(numberOfImages);
 				imageArea.setFilePath(bitmapPath, filePosition);			
 			}
 			else {
@@ -266,7 +304,7 @@ public class BeroViewFrame extends UFrame {
 				break;
 			case NextByBatch:
 				{
-					int batch = bitmapPathList.size() / 10;
+					int batch = bitmapPathList.size() / 20;
 					currentIndex += batch;
 					if(currentIndex >= bitmapPathList.size())
 					{
@@ -288,7 +326,7 @@ public class BeroViewFrame extends UFrame {
 				break;
 			case PreviousByBatch:
 				{
-					int batch = bitmapPathList.size() / 10;
+					int batch = bitmapPathList.size() / 20;
 					currentIndex -= batch;
 					if(currentIndex < 0)
 					{

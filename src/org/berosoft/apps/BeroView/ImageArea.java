@@ -93,47 +93,32 @@ public class ImageArea extends JPanel {
         	int imageHeight = currentImage.getHeight(this);
         	int drawAreaWidth = this.getWidth();
         	int drawAreaHeight = this.getHeight();
-        	
-        	if(Math.abs(zoomFactor - 1.0f) > epsilon) {
-        		int sourceLeft, sourceTop, sourceRight, sourceBottom;
-        		int destinationLeft, destinationTop, destinationRight, destinationBottom;
-        		
-        		// setup source rectangle -> just the image dimensions
-        		sourceLeft = 0; sourceTop = 0;
-        		sourceRight = imageWidth; sourceBottom = imageHeight;
-        		destinationLeft = drawAreaWidth / 2 - (int)(imageWidth * zoomFactor / 2);
-        		destinationRight = drawAreaWidth - destinationLeft;
-        		destinationTop = drawAreaHeight / 2 - (int)(imageHeight * zoomFactor / 2);
-        		destinationBottom = drawAreaHeight - destinationTop;
-        		
-           		g.drawImage(currentImage, destinationLeft - panX, destinationTop - panY, destinationRight - panX, destinationBottom - panY,
-           				    sourceLeft, sourceTop, sourceRight, sourceBottom, Color.BLACK, this);
-        	} else {
-            	if(imageWidth > drawAreaWidth || imageHeight > drawAreaHeight)
-            	{
-                	int scaleToWidth = -1;
-                	int scaleToHeight = -1;
-                	
+
+        	if (Math.abs(zoomFactor - 1.0f) < epsilon) {
+            	if (imageWidth > drawAreaWidth || imageHeight > drawAreaHeight) {
                 	float widthRatio = (float)(imageWidth) / (float)(drawAreaWidth);
                 	float heightRatio = (float)(imageHeight) / (float)(drawAreaHeight);
-                	if(widthRatio > heightRatio)
-                	{
-                		scaleToWidth = drawAreaWidth;
-                		scaleToHeight = (int)((float)(imageHeight) / widthRatio);
+                	if (widthRatio > heightRatio) {
+                		zoomFactor = 1.0f / widthRatio;
+                	} else {
+                		zoomFactor = 1.0f / heightRatio;
                 	}
-                	else
-                	{
-                		scaleToHeight = drawAreaHeight;
-                		scaleToWidth = (int)((float)(imageWidth) / heightRatio);
-                	}
-                	
-            		g.drawImage(currentImage, drawAreaWidth / 2 - scaleToWidth / 2, drawAreaHeight / 2 - scaleToHeight / 2, scaleToWidth, scaleToHeight, this);
-            	}
-            	else
-            	{
-            		g.drawImage(currentImage, drawAreaWidth / 2 - imageWidth / 2, drawAreaHeight / 2 - imageHeight / 2, this);
             	}
         	}
+
+    		int sourceLeft, sourceTop, sourceRight, sourceBottom;
+    		int destinationLeft, destinationTop, destinationRight, destinationBottom;
+    		
+    		// setup source rectangle -> just the image dimensions
+    		sourceLeft = 0; sourceTop = 0;
+    		sourceRight = imageWidth; sourceBottom = imageHeight;
+    		destinationLeft = drawAreaWidth / 2 - (int)(imageWidth * zoomFactor / 2);
+    		destinationRight = drawAreaWidth - destinationLeft;
+    		destinationTop = drawAreaHeight / 2 - (int)(imageHeight * zoomFactor / 2);
+    		destinationBottom = drawAreaHeight - destinationTop;
+    		
+       		g.drawImage(currentImage, destinationLeft - panX, destinationTop - panY, destinationRight - panX, destinationBottom - panY,
+       				    sourceLeft, sourceTop, sourceRight, sourceBottom, Color.WHITE, this);
         }
         
     	if(currentFilePath != null && !currentFilePath.isEmpty()) {

@@ -37,9 +37,9 @@ public class ImageArea extends JPanel {
     		return;
     	}
     	
-    	currentImage = image;
     	zoomFactor = 1.0f;
     	panX = panY = 0;
+    	currentImage = image;
     	this.repaint();
     }
 

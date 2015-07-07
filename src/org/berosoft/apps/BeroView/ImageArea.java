@@ -4,6 +4,7 @@
 package org.berosoft.apps.BeroView;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 
@@ -29,7 +30,7 @@ public class ImageArea extends JPanel {
 	private Image  currentImage;
 	private String currentFilePath;
 	private String currentFilePosition;
-
+	
     public void setImage(Image image) {
     	if(image == null)
     	{
@@ -46,7 +47,6 @@ public class ImageArea extends JPanel {
 	public void setFilePath(String filePath, String filePosition) {
 		currentFilePath = filePath;
 		currentFilePosition = filePosition;
-		this.repaint();
 	}
 	
 	public void zoomIn() {
@@ -80,8 +80,11 @@ public class ImageArea extends JPanel {
 	}
     
     // Class constructor  
-    ImageArea() { 
-    } 
+	public ImageArea() {
+		setOpaque(true);
+		setBackground(Color.BLACK); 
+	}
+
  
 	public void paint(Graphics g) { 
     	super.paint(g);
@@ -134,6 +137,9 @@ public class ImageArea extends JPanel {
         }
         
     	if(currentFilePath != null && !currentFilePath.isEmpty()) {
+    		Font currentFont = g.getFont();
+    		Font newFont = currentFont.deriveFont(currentFont.getSize() * 1.4f);
+    		g.setFont(newFont);
     		g.setColor(Color.WHITE);
     		g.drawString(currentFilePath, 25, 25);
     		g.drawString(currentFilePosition, 25, 40);

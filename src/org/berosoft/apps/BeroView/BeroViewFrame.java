@@ -200,14 +200,23 @@ public class BeroViewFrame extends UFrame {
 		}
 		
         int notches = e.getWheelRotation();
+        boolean zoomImage = e.isControlDown(); // [CTRL] + MouseWheel is zoom in/out
         boolean proceedByBatch = e.isShiftDown(); // [SHIFT] + MouseWheel big steps progression, single step otherwise
         if (notches < 0) {
+        	if (zoomImage) {
+        		imageArea.zoomOut();
+        		return;
+        	}
         	if(proceedByBatch) {
     			proceedToImage(Progress.PreviousByBatch);
         	} else {
     			proceedToImage(Progress.Previous);
         	}
         } else {
+        	if (zoomImage) {
+        		imageArea.zoomIn();
+        		return;
+        	}
         	if(proceedByBatch) {
     			proceedToImage(Progress.NextByBatch);
         	} else {

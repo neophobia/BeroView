@@ -21,16 +21,25 @@ public class ImageArea extends JPanel {
 	private final float epsilon = 0.00000001f;
 	
 	private final float zoomStep = 0.8f;
-	private float       zoomFactor = 1.0f;
+	private float       zoomFactor;
 	
 	private final int panStep = 25;
-	private int       panX = 0;
-	private int       panY = 0;
+	private int       panX;
+	private int       panY;
 	
 	private Image  currentImage;
 	private String currentFilePath;
 	private String currentFilePosition;
 	
+    // Class constructor  
+	public ImageArea() {
+		panX = 0;
+		panY = 0;
+		zoomFactor = 1.0f;
+		setOpaque(true);
+		setBackground(Color.BLACK); 
+	}
+
     public void setImage(Image image) {
     	if(image == null)
     	{
@@ -79,13 +88,6 @@ public class ImageArea extends JPanel {
 		this.repaint();
 	}
     
-    // Class constructor  
-	public ImageArea() {
-		setOpaque(true);
-		setBackground(Color.BLACK); 
-	}
-
- 
 	public void paint(Graphics g) { 
     	super.paint(g);
         if (currentImage != null) {
@@ -95,6 +97,7 @@ public class ImageArea extends JPanel {
         	int drawAreaHeight = this.getHeight();
 
         	if (Math.abs(zoomFactor - 1.0f) < epsilon) {
+        		// 'shrink-to-fit' large images when first displayed
             	if (imageWidth > drawAreaWidth || imageHeight > drawAreaHeight) {
                 	float widthRatio = (float)(imageWidth) / (float)(drawAreaWidth);
                 	float heightRatio = (float)(imageHeight) / (float)(drawAreaHeight);

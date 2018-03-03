@@ -227,9 +227,9 @@ public class BeroViewFrame extends UFrame {
 	
 	private void LoadImageAsync()
 	{
-		String bitmapPath = bitmapPathList.get(currentIndex);
+		final String bitmapPath = bitmapPathList.get(currentIndex);
 		imageLoaderAction.start();
-		BeroViewFrame imageFrame = this;
+		final BeroViewFrame imageFrame = this;
         Thread thread = new Thread(new Runnable() {
             public void run() {
                 imageLoaderAction.run(bitmapPath, new ImageLoaderAction.ImageLoaderEvents() {

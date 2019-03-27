@@ -37,7 +37,7 @@ public class ImageArea extends JPanel {
 		panY = 0;
 		zoomFactor = 1.0f;
 		setOpaque(true);
-		setBackground(Color.BLACK); 
+		// setBackground(Color.BLACK); 
 	}
 
     public void setImage(Image image) {
@@ -125,9 +125,9 @@ public class ImageArea extends JPanel {
         }
         
     	if(currentFilePath != null && !currentFilePath.isEmpty()) {
-    		Font currentFont = g.getFont();
-    		Font newFont = currentFont.deriveFont(currentFont.getSize() * 1.4f);
-    		g.setFont(newFont);
+    		// Font currentFont = g.getFont();
+    		// Font newFont = currentFont.deriveFont(currentFont.getSize() * 1.4f);
+    		// g.setFont(newFont);
     		g.setColor(Color.WHITE);
     		g.drawString(currentFilePath, 25, 25);
     		g.drawString(currentFilePosition, 25, 40);

@@ -27,9 +27,10 @@ public class ImageArea extends JPanel {
 	private int       panX;
 	private int       panY;
 	
-	private Image  currentImage;
-	private String currentFilePath;
-	private String currentFilePosition;
+	private Image     currentImage;
+	private String    currentFilePath;
+	private String    currentFilePosition;
+	private boolean   currentFileIsMarked;
 	
     // Class constructor  
 	public ImageArea() {
@@ -53,9 +54,10 @@ public class ImageArea extends JPanel {
     	this.repaint();
     }
 
-	public void setFilePath(String filePath, String filePosition) {
+	public void setFilePath(String filePath, String filePosition, boolean isMarked) {
 		currentFilePath = filePath;
 		currentFilePosition = filePosition;
+		currentFileIsMarked = isMarked;
 	}
 	
 	public void zoomIn() {
@@ -128,7 +130,12 @@ public class ImageArea extends JPanel {
     		// Font currentFont = g.getFont();
     		// Font newFont = currentFont.deriveFont(currentFont.getSize() * 1.4f);
     		// g.setFont(newFont);
-    		g.setColor(Color.WHITE);
+    		if ( currentFileIsMarked ) {
+        		g.setColor(Color.RED);
+    			
+    		} else {
+        		g.setColor(Color.WHITE);
+    		}
     		g.drawString(currentFilePath, 25, 25);
     		g.drawString(currentFilePosition, 25, 40);
     	}

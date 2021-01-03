@@ -3,8 +3,11 @@ package org.berosoft.apps.BeroView;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.util.*;
 
 import javax.swing.*;
@@ -152,6 +155,8 @@ public class BeroViewExplorer extends UFrame
 
     /** The list of directories forward (in history) from the current directory. */
     private LinkedList<File> nextDirs = new LinkedList<File>();
+    
+    private LinkedList<String> markedImagesList = new LinkedList<String>();
 
     /***************************************************************************
      * Creates a BeroViewExplorer frame.
@@ -190,6 +195,15 @@ public class BeroViewExplorer extends UFrame
         menubar.add( toolsMenu );
 
         this.setJMenuBar( menubar );
+        
+        final BeroViewExplorer that = this;
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing( java.awt.event.WindowEvent windowEvent ) {
+            	final BeroViewExplorer explorer = that;
+            	explorer.saveMarkedList();
+            }
+        });
 
         // ---------------------------------------------------------------------
         // Setup tool bar
@@ -327,6 +341,7 @@ public class BeroViewExplorer extends UFrame
     {
         if(startDir != null && startDir.isDirectory())
         {
+        	final BeroViewExplorer explorer = this;
         	final LinkedList<String> slideshowFilePaths = new LinkedList<String>();
         	traverseTreeForBitmapFiles(startDir, slideshowFilePaths);
         	
@@ -338,7 +353,7 @@ public class BeroViewExplorer extends UFrame
 			final int currentIndex = 0;
 	        EventQueue.invokeLater(new Runnable() {
 	            public void run() {
-        	        new BeroViewFrame(slideshowFilePaths, currentIndex);
+        	        new BeroViewFrame(explorer, slideshowFilePaths, currentIndex);
 	            }
 	        });
         }
@@ -401,9 +416,7 @@ public class BeroViewExplorer extends UFrame
             if( setTree )
             {
                 dirTree.setSelected( new File[] { dir } );
-            }
-            else
-            {
+            } else {
                 showDirInTable( dir );
             }
             addressField.setText( dir.getAbsolutePath() );
@@ -413,8 +426,30 @@ public class BeroViewExplorer extends UFrame
 
         upButton.setEnabled( parent != null );
     }
+    
+    public LinkedList<String> getMarkedImages() {
+		return markedImagesList;
+	}
 
-    /***************************************************************************
+	public void setMarkedImages( LinkedList<String> markedImagesList ) {
+		this.markedImagesList = markedImagesList;
+	}
+	
+	public void toggleMarkedState( String fileAbsolutePath ) {
+		if ( fileAbsolutePath == null || fileAbsolutePath.length() == 0 ) {
+			return;
+		}
+		
+		int index = markedImagesList.indexOf(fileAbsolutePath);
+		
+		if (index >= 0) {
+			markedImagesList.remove(index);
+		} else {
+			markedImagesList.add( fileAbsolutePath );
+		}
+	}
+
+	/***************************************************************************
      * Returns the current directory displayed.
      * @return The current directory displayed.
      **************************************************************************/
@@ -566,6 +601,7 @@ public class BeroViewExplorer extends UFrame
     
     private void fileTableFileOpen() throws Exception
     {
+    	final BeroViewExplorer explorer = this;
         File file = fileTable.getSelectedFile();
         if( file != null )
         {
@@ -598,7 +634,7 @@ public class BeroViewExplorer extends UFrame
             		
         	        EventQueue.invokeLater(new Runnable() {
         	            public void run() {
-                	        new BeroViewFrame(bitmapPathList, currentIndex);
+                	        new BeroViewFrame(explorer, bitmapPathList, currentIndex);
         	            }
         	        });
             	}
@@ -610,7 +646,7 @@ public class BeroViewExplorer extends UFrame
             			final int currentIndex = 0;
             	        EventQueue.invokeLater(new Runnable() {
             	            public void run() {
-                    	        new BeroViewFrame(playlistContent, currentIndex);
+                    	        new BeroViewFrame(explorer, playlistContent, currentIndex);
             	            }
             	        });
             		}
@@ -824,6 +860,42 @@ public class BeroViewExplorer extends UFrame
             addLastFile();
         }
     }
+
+	/**
+	 * @param explorer
+	 */
+	public void saveMarkedList() {
+		if ( getMarkedImages().size() > 0 ) {
+		    if ( JOptionPane.showConfirmDialog(this, 
+		        "There is a list of marked images. Do you want to save the list?", "Save Marked Images List?", 
+		        JOptionPane.YES_NO_OPTION,
+		        JOptionPane.QUESTION_MESSAGE ) == JOptionPane.YES_OPTION) {
+		    	
+		    	JFileChooser fileChooser = new JFileChooser();
+		    	fileChooser.setDialogTitle("Specify a file to save");
+		    	fileChooser.setCurrentDirectory(getDirectory());
+		    	 
+		    	int userSelection = fileChooser.showSaveDialog(this);
+		    	 
+		    	if (userSelection == JFileChooser.APPROVE_OPTION) {
+		    	    File fileToSave = fileChooser.getSelectedFile();
+					System.out.println("Saving marked images to file >> " + fileToSave.getAbsolutePath() + " <<");
+		    	    
+					String pathPrefix = getDirectory().getAbsolutePath() + "/";
+					try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileToSave, true));) {
+					    for (String content : getMarkedImages()) {
+					    	String outString = content.replace(pathPrefix, "");
+					    	System.out.println("Writing marked image >> " + outString + " <<");
+					    	bw.append(outString);
+					    	bw.newLine();
+					    }
+					} catch (Exception e) {
+						e.printStackTrace();
+					}        					
+		    	}
+		    }
+		}
+	}
 }
 
 class BackButtonActionHandler implements ActionListener

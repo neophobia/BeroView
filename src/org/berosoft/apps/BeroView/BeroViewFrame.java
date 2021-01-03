@@ -26,8 +26,10 @@ public class BeroViewFrame extends UFrame {
 
 	private static final long serialVersionUID = -7275993466219595608L;
 
+	private BeroViewExplorer explorer;
 	private ImageArea imageArea;
 	private LinkedList<String> bitmapPathList;
+	private boolean[] isBitmapMarked;
 	private Image currentImage;
 	private int currentIndex;
 	private int numberOfImages;
@@ -36,11 +38,13 @@ public class BeroViewFrame extends UFrame {
 	private boolean showFilePath = false;
 	private ImageLoaderAction imageLoaderAction = new ImageLoaderAction();
 
-	public BeroViewFrame(LinkedList<String> filePathList, int index) {
+	public BeroViewFrame(BeroViewExplorer parentWindow, LinkedList<String> filePathList, int index) {
+		explorer = parentWindow;
 		currentIndex = index;
 		bitmapPathList = filePathList;
 		numberOfImages = bitmapPathList.size();
-
+		isBitmapMarked = new boolean[numberOfImages];
+		
 		String currentPath = bitmapPathList.get(currentIndex);
 		currentImage = new ImageIcon(currentPath).getImage();
 
@@ -122,6 +126,11 @@ public class BeroViewFrame extends UFrame {
 		}
 			break;
 
+		case KeyEvent.VK_M: { // mark image
+			toggleMarkedState();
+		}
+			break;
+
 		case KeyEvent.VK_D: {
 			showFilePath = !showFilePath;
 			updateImageArea();
@@ -130,8 +139,7 @@ public class BeroViewFrame extends UFrame {
 
 		case KeyEvent.VK_F:
 		case KeyEvent.VK_V:
-		case KeyEvent.VK_ENTER: { // switch between full screen and windowed
-									// mode
+		case KeyEvent.VK_ENTER: { // toggle full screen / windowed mode
 			toggleFullscreenDisplay();
 			updateImageArea();
 		}
@@ -238,8 +246,9 @@ public class BeroViewFrame extends UFrame {
 	}
 
 	private void updateImageArea() {
-		String bitmapPath = bitmapPathList.get(currentIndex);
-		String filePosition = Integer.toString(currentIndex + 1) + " / " + Integer.toString(numberOfImages);
+		String  bitmapPath = bitmapPathList.get(currentIndex);
+		String  filePosition = Integer.toString(currentIndex + 1) + " / " + Integer.toString(numberOfImages);
+		boolean isMarked = isBitmapMarked[currentIndex];
 
 		if (!isFullscreen) {
 			Dimension imageSize = new Dimension(currentImage.getWidth(this), currentImage.getHeight(this));
@@ -250,7 +259,7 @@ public class BeroViewFrame extends UFrame {
 				pack();
 			}
 
-			imageArea.setFilePath("", "");
+			imageArea.setFilePath("", "", false);
 
 			if (showFilePath) {
 				setTitle("BeroView - " + filePosition + " - " + bitmapPath);
@@ -259,9 +268,9 @@ public class BeroViewFrame extends UFrame {
 			}
 		} else {
 			if (showFilePath) {
-				imageArea.setFilePath(bitmapPath, filePosition);
+				imageArea.setFilePath(bitmapPath, filePosition, isMarked);
 			} else {
-				imageArea.setFilePath("", "");
+				imageArea.setFilePath("", "", false);
 			}
 		}
 		imageArea.setImage(currentImage);
@@ -355,6 +364,12 @@ public class BeroViewFrame extends UFrame {
 			setUndecorated(false);
 			setVisible(true);
 		}
+	}
+	
+	private void toggleMarkedState() {
+		isBitmapMarked[currentIndex] = !isBitmapMarked[currentIndex];
+		updateImageArea();
+		explorer.toggleMarkedState(bitmapPathList.get(currentIndex));
 	}
 }
 

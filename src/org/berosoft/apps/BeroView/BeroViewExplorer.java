@@ -51,6 +51,9 @@ public class BeroViewExplorer extends UFrame
     /** Allows the user to exit this application. */
     private JMenuItem exitMenuItem = new JMenuItem();
 
+    /** Allows the user to save & clear the marked images list. */
+    private JMenuItem saveMarkedImagesListMenuItem = new JMenuItem();
+
     /** Menu that displays the tools of this application. */
     private JMenu toolsMenu = new JMenu();
 
@@ -172,6 +175,7 @@ public class BeroViewExplorer extends UFrame
         MouseListener fileTableMouseListener = new FileTableMouseHandler( this );
         ListSelectionListener fileTableSelListener = new FileTableSelectionHandler( this );
         KeyListener fileTableKeyListener = new FileTableKeyHandler( this );
+        SaveMarkedImagesMenuListener saveMarkedImagesMenuListener = new SaveMarkedImagesMenuListener( this );
 
         // ----------------------------------------------------------------------
         // Setup menu bar
@@ -182,6 +186,12 @@ public class BeroViewExplorer extends UFrame
         exitMenuItem.addActionListener( new ExitListener() );
         exitMenuItem.setIcon( IconConstants.getIcon( IconConstants.CLOSE_16 ) );
         fileMenu.add( exitMenuItem );
+        
+        saveMarkedImagesListMenuItem.setText("Save & clear marked images list");
+        saveMarkedImagesListMenuItem.addActionListener( saveMarkedImagesMenuListener );
+        saveMarkedImagesListMenuItem.setIcon( IconConstants.getIcon( IconConstants.SAVE_16));
+        saveMarkedImagesListMenuItem.setEnabled(false);
+        fileMenu.add( saveMarkedImagesListMenuItem );
 
         toolsMenu.setText( "Tools" );
         optionsMenuItem.setText( "Options" );
@@ -200,7 +210,7 @@ public class BeroViewExplorer extends UFrame
             @Override
             public void windowClosing( java.awt.event.WindowEvent windowEvent ) {
             	final BeroViewExplorer explorer = that;
-            	explorer.saveMarkedList();
+            	explorer.checkForMarkedImages();
             }
         });
 
@@ -446,6 +456,7 @@ public class BeroViewExplorer extends UFrame
 		} else {
 			markedImagesList.add( fileAbsolutePath );
 		}
+		saveMarkedImagesListMenuItem.setEnabled(markedImagesList.size() > 0);
 	}
 
 	/***************************************************************************
@@ -860,41 +871,43 @@ public class BeroViewExplorer extends UFrame
         }
     }
 
-	/**
-	 * @param explorer
-	 */
-	public void saveMarkedList() {
+    public void checkForMarkedImages() {
 		if ( getMarkedImages().size() > 0 ) {
 		    if ( JOptionPane.showConfirmDialog(this, 
 		        "There is a list of marked images. Do you want to save the list?", "Save Marked Images List?", 
 		        JOptionPane.YES_NO_OPTION,
 		        JOptionPane.QUESTION_MESSAGE ) == JOptionPane.YES_OPTION) {
-		    	
-		    	JFileChooser fileChooser = new JFileChooser();
-		    	fileChooser.setDialogTitle("Specify a file to save");
-		    	fileChooser.setCurrentDirectory(getDirectory());
-		    	 
-		    	int userSelection = fileChooser.showSaveDialog(this);
-		    	 
-		    	if (userSelection == JFileChooser.APPROVE_OPTION) {
-		    	    File fileToSave = fileChooser.getSelectedFile();
-					System.out.println("Saving marked images to file >> " + fileToSave.getAbsolutePath() + " <<");
-		    	    
-					String pathPrefix = getDirectory().getAbsolutePath() + "/";
-					try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileToSave, true));) {
-					    for (String content : getMarkedImages()) {
-					    	String outString = content.replace(pathPrefix, "");
-					    	System.out.println("Writing marked image >> " + outString + " <<");
-					    	bw.append(outString);
-					    	bw.newLine();
-					    }
-					} catch (Exception e) {
-						e.printStackTrace();
-					}        					
-		    	}
+		    	saveMarkedList();
 		    }
 		}
-	}
+    }
+    
+	public void saveMarkedList() {
+    	JFileChooser fileChooser = new JFileChooser();
+    	fileChooser.setDialogTitle("Specify a file to save");
+    	fileChooser.setCurrentDirectory(getDirectory());
+    	 
+    	int userSelection = fileChooser.showSaveDialog(this);
+    	 
+    	if (userSelection == JFileChooser.APPROVE_OPTION) {
+    	    File fileToSave = fileChooser.getSelectedFile();
+			System.out.println("Saving marked images to file >> " + fileToSave.getAbsolutePath() + " <<");
+    	    
+			String pathPrefix = getDirectory().getAbsolutePath() + "/";
+			try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileToSave, true));) {
+			    for (String content : getMarkedImages()) {
+			    	String outString = content.replace(pathPrefix, "");
+			    	System.out.println("Writing marked image >> " + outString + " <<");
+			    	bw.append(outString);
+			    	bw.newLine();
+			    }
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			getMarkedImages().clear();
+			saveMarkedImagesListMenuItem.setEnabled(false);
+    	}
+    }
 }
 
 class BackButtonActionHandler implements ActionListener
@@ -940,6 +953,23 @@ class OptionMenuItemActionHandler implements ActionListener
     {
         FileConfigurationDialog dialog = FileConfigurationDialog.showDialog( adaptee );
         dialog.getClass();
+    }
+}
+
+class SaveMarkedImagesMenuListener implements ActionListener
+{
+    private BeroViewExplorer adaptee;
+
+    public SaveMarkedImagesMenuListener( BeroViewExplorer adaptee )
+    {
+        this.adaptee = adaptee;
+    }
+
+    public void actionPerformed( ActionEvent e )
+    {
+		if ( adaptee.getMarkedImages().size() > 0 ) {
+	    	adaptee.saveMarkedList();
+		}
     }
 }
 

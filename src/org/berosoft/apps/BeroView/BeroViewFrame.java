@@ -262,7 +262,11 @@ public class BeroViewFrame extends UFrame {
 			imageArea.setFilePath("", "", false);
 
 			if (showFilePath) {
-				setTitle("BeroView - " + filePosition + " - " + bitmapPath);
+				if ( isMarked ) {
+					setTitle("BeroView - " + filePosition + " - " + " MARKED " + bitmapPath);
+				} else {
+					setTitle("BeroView - " + filePosition + " - " + bitmapPath);
+				}
 			} else {
 				setTitle("BeroView");
 			}

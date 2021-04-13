@@ -1,6 +1,7 @@
 package org.berosoft.apps.BeroView;
 
 import java.awt.*;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -9,6 +10,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowEvent;
 import java.util.*;
+import java.util.Timer;
 
 import javax.swing.*;
 
@@ -37,6 +39,8 @@ public class BeroViewFrame extends UFrame {
 	private Random random = new Random();
 	private boolean showFilePath = false;
 	private ImageLoaderAction imageLoaderAction = new ImageLoaderAction();
+	private Timer slideShowTimer;
+	private int slideShowIntervall = 3000; // initially 3 seconds interval
 
 	public BeroViewFrame(BeroViewExplorer parentWindow, LinkedList<String> filePathList, int index) {
 		explorer = parentWindow;
@@ -126,6 +130,38 @@ public class BeroViewFrame extends UFrame {
 		}
 			break;
 
+		case KeyEvent.VK_H: {
+			if(slideShowTimer == null) {
+				slideShowTimer = new Timer();
+				slideShowTimer.schedule(new BeroViewTimerTask(this), slideShowIntervall, slideShowIntervall);
+			} else {
+				slideShowTimer.cancel();
+				slideShowTimer = null;
+			}
+		}
+			break;
+
+		case KeyEvent.VK_LESS: {
+			int modifiers = e.getModifiers();
+
+			if((modifiers & InputEvent.SHIFT_MASK) != 0) {
+				slideShowIntervall += 1000;
+			} else {
+				if(slideShowIntervall > 1000) {
+					slideShowIntervall -= 1000;
+				} else {
+					return; // on lower limit already
+				}
+			}
+
+			if(slideShowTimer != null) {
+				slideShowTimer.cancel();
+				slideShowTimer = new Timer();
+				slideShowTimer.schedule(new BeroViewTimerTask(this), slideShowIntervall, slideShowIntervall);
+			}
+		}
+			break;
+
 		case KeyEvent.VK_M: { // mark image
 			toggleMarkedState();
 		}
@@ -147,6 +183,9 @@ public class BeroViewFrame extends UFrame {
 
 		case KeyEvent.VK_ESCAPE:
 		case KeyEvent.VK_Q: { // close the BeroViewFrame instance
+			if(slideShowTimer != null) {
+				slideShowTimer.cancel();
+			}
 			this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
 		}
 			break;
@@ -225,6 +264,11 @@ public class BeroViewFrame extends UFrame {
 				proceedToImage(Progress.Next);
 			}
 		}
+	}
+
+	public void onTimerTaskRun() {
+		System.out.println("Slideshow next image...");
+		proceedToImage(Progress.Next);
 	}
 
 	private void LoadImageAsync() {
@@ -413,4 +457,17 @@ class BeroViewFrameMouseWheelHandler implements MouseWheelListener {
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		adaptee.onMouseWheelMoved(e);
 	}
+}
+
+class BeroViewTimerTask extends TimerTask {
+	private BeroViewFrame adaptee;
+
+	public BeroViewTimerTask(BeroViewFrame adaptee) {
+		this.adaptee = adaptee;
+	}
+
+	@Override
+	public void run() {
+		this.adaptee.onTimerTaskRun();
+    }
 }

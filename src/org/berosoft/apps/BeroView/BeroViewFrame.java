@@ -142,9 +142,9 @@ public class BeroViewFrame extends UFrame {
 			break;
 
 		case KeyEvent.VK_LESS: {
-			int modifiers = e.getModifiers();
+			int modifiers = e.getModifiersEx();
 
-			if((modifiers & InputEvent.SHIFT_MASK) != 0) {
+			if((modifiers & InputEvent.SHIFT_DOWN_MASK) != 0) {
 				slideShowIntervall += 1000;
 			} else {
 				if(slideShowIntervall > 1000) {

@@ -27,13 +27,17 @@ public class ImageArea extends JPanel {
 	private int       panX;
 	private int       panY;
 	
+	private int       imageWidth;
+	private int       imageHeight;
 	private Image     currentImage;
 	private String    currentFilePath;
 	private String    currentFilePosition;
+	private String    currentDimensions;
 	private boolean   currentFileIsMarked;
 	
     // Class constructor  
 	public ImageArea() {
+		imageWidth = imageHeight = 0;
 		panX = 0;
 		panY = 0;
 		zoomFactor = 1.0f;
@@ -51,6 +55,9 @@ public class ImageArea extends JPanel {
     	zoomFactor = 1.0f;
     	panX = panY = 0;
     	currentImage = image;
+    	imageWidth = currentImage.getWidth(this);
+    	imageHeight = currentImage.getHeight(this);
+    	currentDimensions = Integer.toString(imageWidth) + " x " + Integer.toString(imageHeight);
     	this.repaint();
     }
 
@@ -93,8 +100,6 @@ public class ImageArea extends JPanel {
 	public void paint(Graphics g) { 
     	super.paint(g);
         if (currentImage != null) {
-        	int imageWidth = currentImage.getWidth(this);
-        	int imageHeight = currentImage.getHeight(this);
         	int drawAreaWidth = this.getWidth();
         	int drawAreaHeight = this.getHeight();
 
@@ -137,7 +142,7 @@ public class ImageArea extends JPanel {
         		g.setColor(Color.WHITE);
     		}
     		g.drawString(currentFilePath, 25, 25);
-    		g.drawString(currentFilePosition, 25, 40);
+    		g.drawString(currentFilePosition + " | " + currentDimensions, 25, 40);
     	}
     }
 }

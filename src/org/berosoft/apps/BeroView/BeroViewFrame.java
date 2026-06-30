@@ -23,7 +23,7 @@ import org.jutils.ui.*;
 public class BeroViewFrame extends UFrame {
 
 	private enum Progress {
-		First, Last, Next, Previous, Random, NextByBatch, PreviousByBatch, GoTo
+		First, Last, Next, Previous, Random, NextByBatch, PreviousByBatch, GoTo, PreviousFolder, NextFolder, NextNamePattern, PreviousNamePattern
 	}
 
 	private static final long serialVersionUID = -7275993466219595608L;
@@ -107,6 +107,17 @@ public class BeroViewFrame extends UFrame {
 		}
 			break;
 
+		case KeyEvent.VK_UP: {
+			int modifiers = e.getModifiersEx();
+
+			if((modifiers & InputEvent.CTRL_DOWN_MASK) != 0) {
+				proceedToImage(Progress.PreviousNamePattern);
+			} else {
+				proceedToImage(Progress.PreviousFolder);
+			}
+		}
+			break;
+
 		case KeyEvent.VK_RIGHT:
 		case KeyEvent.VK_KP_RIGHT:
 		case KeyEvent.VK_SPACE: {
@@ -116,6 +127,17 @@ public class BeroViewFrame extends UFrame {
 
 		case KeyEvent.VK_PAGE_DOWN: {
 			proceedToImage(Progress.NextByBatch);
+		}
+			break;
+
+		case KeyEvent.VK_DOWN: {
+			int modifiers = e.getModifiersEx();
+
+			if((modifiers & InputEvent.CTRL_DOWN_MASK) != 0) {
+				proceedToImage(Progress.NextNamePattern);
+			} else {
+				proceedToImage(Progress.NextFolder);
+			}
 		}
 			break;
 
@@ -356,6 +378,34 @@ public class BeroViewFrame extends UFrame {
 			}
 		}
 			break;
+		case NextFolder: {
+			String fullPath = bitmapPathList.get(currentIndex);
+			String path = fullPath.substring(0, fullPath.lastIndexOf('/'));
+
+			for (int i = currentIndex + 1; i < bitmapPathList.size(); i++) {
+				String nextFullPath = bitmapPathList.get(i);
+				String nextPath = nextFullPath.substring(0, nextFullPath.lastIndexOf('/'));
+				if (!nextPath.equals(path)) {
+					currentIndex = i;
+					break;
+				}
+			}
+		}
+			break;
+		case NextNamePattern: {
+			String currentFullPath = bitmapPathList.get(currentIndex);
+			String currentPattern = getFilenamePattern(currentFullPath);
+
+			for (int i = currentIndex + 1; i < bitmapPathList.size(); i++) {
+				String nextFullPath = bitmapPathList.get(i);
+				String nextPattern = getFilenamePattern(nextFullPath);
+				if (!nextPattern.equals(currentPattern)) {
+					currentIndex = i;
+					break;
+				}
+			}
+		}
+			break;
 		case Previous: { // show the previous image from the bitmap file list or
 							// 'wrap around' when currently showing the first
 							// image
@@ -371,6 +421,34 @@ public class BeroViewFrame extends UFrame {
 			currentIndex -= batch;
 			if (currentIndex < 0) {
 				currentIndex += bitmapPathList.size();
+			}
+		}
+			break;
+		case PreviousFolder: {
+			String fullPath = bitmapPathList.get(currentIndex);
+			String path = fullPath.substring(0, fullPath.lastIndexOf('/'));
+
+			for (int i = currentIndex - 1; i >= 0; i--) {
+				String nextFullPath = bitmapPathList.get(i);
+				String nextPath = nextFullPath.substring(0, nextFullPath.lastIndexOf('/'));
+				if (!nextPath.equals(path)) {
+					currentIndex = i;
+					break;
+				}
+			}
+		}
+			break;
+		case PreviousNamePattern: {
+			String currentFullPath = bitmapPathList.get(currentIndex);
+			String currentPattern = getFilenamePattern(currentFullPath);
+
+			for (int i = currentIndex - 1; i >= 0; i--) {
+				String nextFullPath = bitmapPathList.get(i);
+				String nextPattern = getFilenamePattern(nextFullPath);
+				if (!nextPattern.equals(currentPattern)) {
+					currentIndex = i;
+					break;
+				}
 			}
 		}
 			break;
@@ -395,6 +473,25 @@ public class BeroViewFrame extends UFrame {
 		}
 
 		LoadImageAsync();
+	}
+
+	private String getFilenamePattern(String fullPath) {
+		String fileName = fullPath.substring(fullPath.lastIndexOf('/') + 1);
+		int extensionIndex = fileName.lastIndexOf('.');
+		String baseName = extensionIndex >= 0 ? fileName.substring(0, extensionIndex) : fileName;
+		String extension = extensionIndex >= 0 ? fileName.substring(extensionIndex) : "";
+		StringBuilder pattern = new StringBuilder();
+
+		for (int i = 0; i < baseName.length(); i++) {
+			char currentChar = baseName.charAt(i);
+			if (Character.isDigit(currentChar)) {
+				pattern.append('#');
+			} else {
+				pattern.append(currentChar);
+			}
+		}
+
+		return pattern.toString() + extension;
 	}
 
 	private void toggleFullscreenDisplay() {
